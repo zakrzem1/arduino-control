@@ -1,8 +1,8 @@
 const int relayPin =  22;
 const int relayPinB =  23;
 const int relayPinC =  24;
-const int switchSensorPin = 51;
-const int switchSensorPinB = 52;
+const int switchSensorPin = 49;
+const int switchSensorPinB = 51;
 const int switchSensorPinC = 53;
 const int ledPin = 13;
 int lastSwitchState = HIGH;
@@ -23,9 +23,13 @@ void prepare(int relayPinP, int switchSensorPinP, int lastSwitchStateP){
   pinMode(relayPinP, OUTPUT);
   pinMode(switchSensorPinP, INPUT_PULLUP);
   digitalWrite(relayPinP, lastSwitchStateP);
+  Serial.print("prepare relay pin ");
+  Serial.print(relayPinP);
+  Serial.print(" to ");
+  Serial.println(lastSwitchStateP);
 }
 
-void process(int switchSensorPinP, int *lastSwitchStateP, unsigned long *lastDebounceTimeP, int *switchStateP, int *ledStateP){
+void process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned long *lastDebounceTimeP, int *switchStateP, int *ledStateP){
   int reading = digitalRead(switchSensorPinP);
   if (reading != *lastSwitchStateP) {
     *lastDebounceTimeP = millis();
@@ -35,14 +39,20 @@ void process(int switchSensorPinP, int *lastSwitchStateP, unsigned long *lastDeb
       *switchStateP = reading;
       if (*switchStateP == LOW){
         *ledStateP = !*ledStateP;
+        Serial.print("process relay pin ");
+        Serial.print(relayPinP);
+        Serial.print(" to ");
+        Serial.println(*lastSwitchStateP);
       }
     }
   }
-  digitalWrite(relayPin, *ledStateP);
+  digitalWrite(relayPinP, *ledStateP);
   *lastSwitchStateP = reading;
 }
 
 void setup() {
+  Serial.begin(9600);  
+  Serial.println("--- Start Serial Monitor for mza mega ssr relay wallswitch ---");
   prepare(relayPin, switchSensorPin, lastSwitchState);
   prepare(relayPinB, switchSensorPinB, lastSwitchStateB);
   prepare(relayPinC, switchSensorPinC, lastSwitchStateC);  
@@ -50,8 +60,8 @@ void setup() {
 }
 
 void loop() {
-  process(switchSensorPin, &lastSwitchState, &lastDebounceTime, &switchState, &ledState);
-  process(switchSensorPinB, &lastSwitchStateB, &lastDebounceTimeB, &switchStateB, &ledStateB);
-  process(switchSensorPinC, &lastSwitchStateC, &lastDebounceTimeC, &switchStateC, &ledStateC);
+  process(relayPin, switchSensorPin, &lastSwitchState, &lastDebounceTime, &switchState, &ledState);
+  process(relayPinB, switchSensorPinB, &lastSwitchStateB, &lastDebounceTimeB, &switchStateB, &ledStateB);
+  process(relayPinC, switchSensorPinC, &lastSwitchStateC, &lastDebounceTimeC, &switchStateC, &ledStateC);
   digitalWrite(ledPin, !(ledState && ledStateB && ledStateC));
 }

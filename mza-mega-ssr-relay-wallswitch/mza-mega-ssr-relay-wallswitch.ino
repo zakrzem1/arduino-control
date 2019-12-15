@@ -1,3 +1,6 @@
+#include <RBD_Button.h>
+#include <RBD_Timer.h>
+
 const int relayPin =  22; // garderoba
 const int relayPinB =  23;
 const int relayPinC =  24;
@@ -18,6 +21,10 @@ struct SwitchSensor
     unsigned long lastDebounceTime;
     int ledState;
 };
+// RBD::Button buttonTopRed(50);
+// RBD::Button buttonTopGreen(52);
+// RBD::Button buttonBottomRed(??);
+
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, HIGH};
 SwitchSensor staircaseTopGreen = {52, HIGH, HIGH, 0, HIGH};
 const int switchSensorPin = 49;
@@ -37,7 +44,9 @@ unsigned long lastDebounceTime = 0;
 unsigned long lastDebounceTimeB = 0;
 unsigned long lastDebounceTimeC = 0;
 const unsigned long debounceDelay = 50;
-int once=4;
+RBD::Timer staircaseTimerMiddle;
+RBD::Timer staircaseTimerTop;
+RBD::Timer staircaseTimerBottom;
 
 void prepare(int relayPinP, int switchSensorPinP, int lastSwitchStateP){
   pinMode(relayPinP, OUTPUT);
@@ -48,39 +57,32 @@ void prepare(int relayPinP, int switchSensorPinP, int lastSwitchStateP){
   Serial.print(" to ");
   Serial.println(lastSwitchStateP);
 }
+
 void prepareSwitchSensor(int relayPinP, SwitchSensor switchSensor){
-  int switchSensorPinP = switchSensor.pin;
-  int lastSwitchStateP = switchSensor.lastSwitchState;
   pinMode(relayPinP, OUTPUT);
-  pinMode(switchSensorPinP, INPUT_PULLUP);
-  digitalWrite(relayPinP, lastSwitchStateP);
-  Serial.print(" prepare sensor switch pin ");
-  Serial.print(switchSensorPinP);
-  Serial.print(" for relay pin ");
-  Serial.print(relayPinP);
-  Serial.print(" set initial relay state to ");
-  Serial.println(lastSwitchStateP);
-  Serial.print(" current switch sensor status=");
-  Serial.println(digitalRead(switchSensorPinP));
+  digitalWrite(relayPinP, switchSensor.lastSwitchState);
+  pinMode(switchSensor.pin, INPUT_PULLUP);
+  // Serial.print(" prepare sensor switch pin ");
+  // Serial.print(switchSensor.pin);
+  // Serial.print(" for relay pin ");
+  // Serial.print(relayPinP);
+  // Serial.print(" set initial relay state to ");
+  // Serial.println(switchSensor.lastSwitchState);
+  // Serial.print(" current switch sensor status=");
+  // Serial.println(digitalRead(switchSensor.pin));
 }
 
 void processSwitchSensor(int relayPinP, SwitchSensor *switchSensor){
-  if(once>0){
-    if(once % 4 == 0){
-      Serial.println("processSwitchSensor ");
-      Serial.println(switchSensor->pin);
-      Serial.println(switchSensor->lastSwitchState);
-      Serial.println(switchSensor->lastDebounceTime);
-      Serial.println(switchSensor->switchState);
-      Serial.println(switchSensor->ledState);
-      Serial.println();
-    }
-    once--;
+  int delta = process( relayPinP, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(switchSensor->ledState));
+  if (delta != 0 ){
+    staircaseTimerMiddle.restart();
+    staircaseTimerBottom.restart();
   }
-  process( relayPinP, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(switchSensor->ledState));
-  
 }
-void process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned long *lastDebounceTimeP, int *switchStateP, int *ledStateP){
+
+// return -1 when turned off, 0 if stay,  +1 when turned on
+int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned long *lastDebounceTimeP, int *switchStateP, int *ledStateP){
+  int ret = 0;
   int reading = digitalRead(switchSensorPinP);
   if (reading != *lastSwitchStateP) {
     *lastDebounceTimeP = millis();
@@ -88,13 +90,9 @@ void process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigne
   if((millis()-*lastDebounceTimeP)> debounceDelay){
     if (reading != *switchStateP) {
       *switchStateP = reading;
-      if(switchSensorPinP == 52){
-        Serial.print("switchStateP set to");
-        Serial.print(*switchStateP );
-        Serial.println(millis());
-      }
       if (*switchStateP == LOW){
         *ledStateP = !*ledStateP;
+        ret =  (*ledStateP) * 2 - 1;
         Serial.print("triggered switch");
         Serial.print(switchSensorPinP);
         Serial.print(" to toggle relay pin ");
@@ -106,6 +104,7 @@ void process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigne
   }
   digitalWrite(relayPinP, *ledStateP);
   *lastSwitchStateP = reading;
+  return ret;
 }
 
 void setup() {
@@ -116,11 +115,14 @@ void setup() {
   prepare(relayPinC, switchSensorPinC, lastSwitchStateC);  
 
   prepareSwitchSensor( relayPin8ch5, staircaseTopRed); 
-  prepareSwitchSensor( relayPin8ch7, staircaseTopGreen); 
-//  prepare(relayPin8ch5, switchSensorPinStaircaseTopRed, lastSwitchState);  
-//  prepare(relayPin8ch7, switchSensorPinStaircaseTopRed, lastSwitchState);  
-//  prepare(relayPin8ch8 , switchSensorPinStaircaseTopRed, lastSwitchState);  
+  prepareSwitchSensor( relayPin8ch7, staircaseTopRed); // staircaseTopGreen
+  prepareSwitchSensor( relayPin8ch8, staircaseTopRed); // staircase 
+  
   pinMode(ledPin, OUTPUT);
+  
+  staircaseTimerMiddle.setTimeout(1000);
+  staircaseTimerTop.setTimeout(2000);
+  staircaseTimerBottom.setTimeout(2000);
 }
 
 void loop() {
@@ -129,7 +131,26 @@ void loop() {
   process(relayPinC, switchSensorPinC, &lastSwitchStateC, &lastDebounceTimeC, &switchStateC, &ledStateC);
 
   processSwitchSensor(relayPin8ch5, &staircaseTopRed);
-  processSwitchSensor(relayPin8ch7, &staircaseTopGreen);
+  //processSwitchSensor(relayPin8ch7, &staircaseTopGreen);
   //digitalWrite(ledPin, !(ledState && ledStateB && ledStateC && (&staircaseTopRed)->ledState && (&staircaseTopGreen)->ledState));
   digitalWrite(ledPin, !(&staircaseTopRed)->ledState); //&& (&staircaseTopGreen)->ledState)
+
+  
+  if(staircaseTimerMiddle.onRestart()){
+    // toggle middle light
+    digitalWrite(relayPin8ch8, staircaseTopRed.ledState);
+  }
+  if(staircaseTimerBottom.onRestart()){
+    // toggle bottom light
+    digitalWrite(relayPin8ch7, staircaseTopRed.ledState);
+  }
+//  if(staircaseTimerTop.onRestart()){
+//    // toggle bottom light
+//    digitalWrite(relayPin8ch5, staircaseTopRed->ledState);
+//  }
+//  if(buttonTopRed.onPressed()) {
+//    staircaseTimerMidlle.restart();
+//    staircaseTimerBottom.restart();
+//    Serial.println("Button Pressed");
+//  }
 }

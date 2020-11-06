@@ -1,32 +1,39 @@
 #include <RBD_Button.h>
 #include <RBD_Timer.h>
 
-const int relayPin =  22; // garderoba
-const int relayPinB =  23;
-const int relayPinC =  24;
-const int relayPin8ch1 = 26; // bpom
-const int relayPin8ch2 = 27; // pom
-const int relayPin8ch3 = 28; // bziel
-const int relayPin8ch4 = 29; // nieb
-const int relayPin8ch5 = 30; // bnieb 
-const int relayPin8ch6 = 31; // ziel
-const int relayPin8ch7 = 32; // wh-brown
-const int relayPin8ch8 = 33; // brown
+const int relayPin =  22;    // wardrobe
+const int relayPinB =  23;   // wardrobe
+const int relayPinC =  24;   // wardrobe
+const int relayPin8ch1 = 26; // worange
+const int relayPin8ch2 = 27; // orange
+const int relayPin8ch3 = 28; // wgreen
+const int relayPin8ch4 = 29; // blue
+const int relayPin8ch5 = 30; // wblue     staircase upstairs bulb
+const int relayPin8ch6 = 31; // green
+const int relayPin8ch7 = 32; // wh-brown  staircase downstairs bulb
+const int relayPin8ch8 = 33; // brown     staircase middle bulb
 
+struct RelayActuator
+{
+    int pin;
+    int ledState;
+};
 struct SwitchSensor
 {
     int pin;
     int lastSwitchState;
     int switchState;
     unsigned long lastDebounceTime;
-    int ledState;
+    RelayActuator relay;
 };
+
 // RBD::Button buttonTopRed(50);
 // RBD::Button buttonTopGreen(52);
 // RBD::Button buttonBottomRed(??);
-
-SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, HIGH};
+RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW}
 SwitchSensor staircaseTopGreen = {52, HIGH, HIGH, 0, HIGH};
+SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, staircaseUpstairsBulb};
+SwitchSensor staircaseDownstairsRed = {48, HIGH, HIGH, 0, staircaseUpstairsBulb};
 const int switchSensorPin = 49;
 const int switchSensorPinB = 51;
 const int switchSensorPinC = 53;
@@ -58,18 +65,12 @@ void prepare(int relayPinP, int switchSensorPinP, int lastSwitchStateP){
   Serial.println(lastSwitchStateP);
 }
 
-void prepareSwitchSensor(int relayPinP, SwitchSensor switchSensor){
+void prepareRelayActuator(int relayPinP, SwitchSensor switchSensor){
   pinMode(relayPinP, OUTPUT);
-  digitalWrite(relayPinP, switchSensor.lastSwitchState);
+}
+
+void prepareWallSwitch(SwitchSensor switchSensor){
   pinMode(switchSensor.pin, INPUT_PULLUP);
-  // Serial.print(" prepare sensor switch pin ");
-  // Serial.print(switchSensor.pin);
-  // Serial.print(" for relay pin ");
-  // Serial.print(relayPinP);
-  // Serial.print(" set initial relay state to ");
-  // Serial.println(switchSensor.lastSwitchState);
-  // Serial.print(" current switch sensor status=");
-  // Serial.println(digitalRead(switchSensor.pin));
 }
 
 void processSwitchSensor(int relayPinP, SwitchSensor *switchSensor){
@@ -114,9 +115,12 @@ void setup() {
   prepare(relayPinB, switchSensorPinB, lastSwitchStateB);
   prepare(relayPinC, switchSensorPinC, lastSwitchStateC);  
 
-  prepareSwitchSensor( relayPin8ch5, staircaseTopRed); 
-  prepareSwitchSensor( relayPin8ch7, staircaseTopRed); // staircaseTopGreen
-  prepareSwitchSensor( relayPin8ch8, staircaseTopRed); // staircase 
+  prepareWallSwitch(staircaseDownstairsRed);
+  //prepareWallSwitch(staircaseTopGreen);
+  
+  prepareRelayOutput(relayPin8ch5, staircaseDownstairsRed);
+  prepareRelayOutput(relayPin8ch7, staircaseDownstairsRed);
+  prepareRelayOutput(relayPin8ch8, staircaseDownstairsRed);
   
   pinMode(ledPin, OUTPUT);
   
@@ -130,12 +134,9 @@ void loop() {
   process(relayPinB, switchSensorPinB, &lastSwitchStateB, &lastDebounceTimeB, &switchStateB, &ledStateB);
   process(relayPinC, switchSensorPinC, &lastSwitchStateC, &lastDebounceTimeC, &switchStateC, &ledStateC);
 
-  processSwitchSensor(relayPin8ch5, &staircaseTopRed);
+  processSwitchSensor(relayPin8ch5, &staircaseDownstairsRed);
   //processSwitchSensor(relayPin8ch7, &staircaseTopGreen);
-  //digitalWrite(ledPin, !(ledState && ledStateB && ledStateC && (&staircaseTopRed)->ledState && (&staircaseTopGreen)->ledState));
-  digitalWrite(ledPin, !(&staircaseTopRed)->ledState); //&& (&staircaseTopGreen)->ledState)
 
-  
   if(staircaseTimerMiddle.onRestart()){
     // toggle middle light
     digitalWrite(relayPin8ch8, staircaseTopRed.ledState);

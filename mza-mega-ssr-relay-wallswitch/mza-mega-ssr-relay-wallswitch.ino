@@ -30,7 +30,7 @@ struct SwitchSensor
 // RBD::Button buttonTopRed(50);
 // RBD::Button buttonTopGreen(52);
 // RBD::Button buttonBottomRed(??);
-RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW}
+RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
 SwitchSensor staircaseTopGreen = {52, HIGH, HIGH, 0, HIGH};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, staircaseUpstairsBulb};
 SwitchSensor staircaseDownstairsRed = {48, HIGH, HIGH, 0, staircaseUpstairsBulb};
@@ -73,8 +73,8 @@ void prepareWallSwitch(SwitchSensor switchSensor){
   pinMode(switchSensor.pin, INPUT_PULLUP);
 }
 
-void processSwitchSensor(int relayPinP, SwitchSensor *switchSensor){
-  int delta = process( relayPinP, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(switchSensor->ledState));
+void processSwitchSensor(RelayActuator *relayActuator, SwitchSensor *switchSensor){
+  int delta = process( relayActuator->pin, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(relayActuator->ledState));
   if (delta != 0 ){
     staircaseTimerMiddle.restart();
     staircaseTimerBottom.restart();
@@ -118,15 +118,15 @@ void setup() {
   prepareWallSwitch(staircaseDownstairsRed);
   //prepareWallSwitch(staircaseTopGreen);
   
-  prepareRelayOutput(relayPin8ch5, staircaseDownstairsRed);
-  prepareRelayOutput(relayPin8ch7, staircaseDownstairsRed);
-  prepareRelayOutput(relayPin8ch8, staircaseDownstairsRed);
+  prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
+  prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);
+  prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
   
   pinMode(ledPin, OUTPUT);
   
-  staircaseTimerMiddle.setTimeout(1000);
-  staircaseTimerTop.setTimeout(2000);
-  staircaseTimerBottom.setTimeout(2000);
+  staircaseTimerMiddle.setTimeout(750);
+  staircaseTimerTop.setTimeout(1500);
+  staircaseTimerBottom.setTimeout(750);
 }
 
 void loop() {
@@ -134,16 +134,16 @@ void loop() {
   process(relayPinB, switchSensorPinB, &lastSwitchStateB, &lastDebounceTimeB, &switchStateB, &ledStateB);
   process(relayPinC, switchSensorPinC, &lastSwitchStateC, &lastDebounceTimeC, &switchStateC, &ledStateC);
 
-  processSwitchSensor(relayPin8ch5, &staircaseDownstairsRed);
-  //processSwitchSensor(relayPin8ch7, &staircaseTopGreen);
+  processSwitchSensor(&staircaseUpstairsBulb, &staircaseDownstairsRed);
+  processSwitchSensor(&staircaseUpstairsBulb, &staircaseTopGreen);
 
   if(staircaseTimerMiddle.onRestart()){
     // toggle middle light
-    digitalWrite(relayPin8ch8, staircaseTopRed.ledState);
+    digitalWrite(relayPin8ch8, staircaseUpstairsBulb.ledState);
   }
   if(staircaseTimerBottom.onRestart()){
     // toggle bottom light
-    digitalWrite(relayPin8ch7, staircaseTopRed.ledState);
+    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
   }
 //  if(staircaseTimerTop.onRestart()){
 //    // toggle bottom light

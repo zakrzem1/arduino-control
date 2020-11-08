@@ -31,9 +31,9 @@ struct SwitchSensor
 // RBD::Button buttonTopGreen(52);
 // RBD::Button buttonBottomRed(??);
 RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
-SwitchSensor staircaseTopGreen = {52, HIGH, HIGH, 0, HIGH};
+SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, staircaseUpstairsBulb};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, staircaseUpstairsBulb};
-SwitchSensor staircaseDownstairsRed = {48, HIGH, HIGH, 0, staircaseUpstairsBulb};
+SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, staircaseUpstairsBulb};
 const int switchSensorPin = 49;
 const int switchSensorPinB = 51;
 const int switchSensorPinC = 53;
@@ -116,7 +116,7 @@ void setup() {
   prepare(relayPinC, switchSensorPinC, lastSwitchStateC);  
 
   prepareWallSwitch(staircaseDownstairsRed);
-  //prepareWallSwitch(staircaseTopGreen);
+  prepareWallSwitch(staircaseTopGreen);
   
   prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
   prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);

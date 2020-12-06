@@ -24,16 +24,16 @@ struct SwitchSensor
     int lastSwitchState;
     int switchState;
     unsigned long lastDebounceTime;
-    RelayActuator relay;
+    RelayActuator *relay;
 };
 
 // RBD::Button buttonTopRed(50);
-// RBD::Button buttonTopGreen(52);
-// RBD::Button buttonBottomRed(??);
+// RBD::Button buttonTopGreen(48);
+// RBD::Button buttonBottomRed(52??);
 RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
-SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, staircaseUpstairsBulb};
-SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, staircaseUpstairsBulb};
-SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, staircaseUpstairsBulb};
+SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
+SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};
+SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 const int switchSensorPin = 49;
 const int switchSensorPinB = 51;
 const int switchSensorPinC = 53;
@@ -124,8 +124,8 @@ void setup() {
   
   pinMode(ledPin, OUTPUT);
   
-  staircaseTimerMiddle.setTimeout(750);
-  staircaseTimerTop.setTimeout(1500);
+  staircaseTimerMiddle.setTimeout(500);
+  staircaseTimerTop.setTimeout(250);
   staircaseTimerBottom.setTimeout(750);
 }
 

@@ -1,6 +1,6 @@
 #include <RBD_Button.h>
 #include <RBD_Timer.h>
-
+#include <Firmata.h>
 const int relayPin =  22;    // wardrobe
 const int relayPinB =  23;   // wardrobe
 const int relayPinC =  24;   // wardrobe
@@ -54,15 +54,15 @@ const unsigned long debounceDelay = 50;
 RBD::Timer staircaseTimerMiddle;
 RBD::Timer staircaseTimerTop;
 RBD::Timer staircaseTimerBottom;
+char switchLogMsg[56];
+char preparePinLogMsg[29];
 
 void prepare(int relayPinP, int switchSensorPinP, int lastSwitchStateP){
   pinMode(relayPinP, OUTPUT);
   pinMode(switchSensorPinP, INPUT_PULLUP);
   digitalWrite(relayPinP, lastSwitchStateP);
-  Serial.print("prepare relay pin ");
-  Serial.print(relayPinP);
-  Serial.print(" to ");
-  Serial.println(lastSwitchStateP);
+  snprintf(preparePinLogMsg, sizeof(preparePinLogMsg), "prepare relay pin %i to %i",relayPinP, lastSwitchStateP);
+  Firmata.sendString(preparePinLogMsg);
 }
 
 void prepareRelayActuator(int relayPinP, SwitchSensor switchSensor){
@@ -94,12 +94,8 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
       if (*switchStateP == LOW){
         *ledStateP = !*ledStateP;
         ret =  (*ledStateP) * 2 - 1;
-        Serial.print("triggered switch");
-        Serial.print(switchSensorPinP);
-        Serial.print(" to toggle relay pin ");
-        Serial.print(relayPinP);
-        Serial.print(" set to ");
-        Serial.println(*ledStateP);
+        snprintf(switchLogMsg, sizeof(switchLogMsg), "triggered switch %i to toggle relay pin %i set to %i",switchSensorPinP, relayPinP, *ledStateP);
+        Firmata.sendString(switchLogMsg);
       }
     }
   }
@@ -109,8 +105,12 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
 }
 
 void setup() {
-  Serial.begin(9600);  
-  Serial.println("--- Start Serial Monitor for mza mega ssr relay wallswitch ---");
+  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
+  Firmata.attach(STRING_DATA, stringCallback);
+  Firmata.attach(START_SYSEX, sysexCallback);
+  Firmata.begin(57600);
+
+  Firmata.sendString("--- Start Serial Monitor for mza mega ssr relay wallswitch ---");
   prepare(relayPin, switchSensorPin, lastSwitchState);
   prepare(relayPinB, switchSensorPinB, lastSwitchStateB);
   prepare(relayPinC, switchSensorPinC, lastSwitchStateC);  
@@ -154,4 +154,19 @@ void loop() {
 //    staircaseTimerBottom.restart();
 //    Serial.println("Button Pressed");
 //  }
+  while (Firmata.available()) {
+    Firmata.processInput();
+  }
+}
+
+// firmata callbacks
+void stringCallback(char *myString)
+{
+  Firmata.sendString(myString);
+}
+
+
+void sysexCallback(byte command, byte argc, byte *argv)
+{
+  Firmata.sendSysex(command, argc, argv);
 }

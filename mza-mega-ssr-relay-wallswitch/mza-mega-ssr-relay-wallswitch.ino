@@ -37,7 +37,6 @@ SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, &staircaseUpstairsBulb
 const int switchSensorPin = 49;
 const int switchSensorPinB = 51;
 const int switchSensorPinC = 53;
-const int ledPin = 13;
 int lastSwitchState = HIGH;
 int lastSwitchStateB = HIGH;
 int lastSwitchStateC = HIGH;
@@ -122,7 +121,7 @@ void setup() {
   prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
   
-  pinMode(ledPin, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   
   staircaseTimerMiddle.setTimeout(500);
   staircaseTimerTop.setTimeout(250);
@@ -162,7 +161,12 @@ void loop() {
 // firmata callbacks
 void stringCallback(char *myString)
 {
-  Firmata.sendString(myString);
+  if(strcmp(myString, "GO") == 0){
+    digitalWrite(LED_BUILTIN, HIGH);
+  }else if (strcmp(myString, "GC")==0){
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+  Firmata.sendString(myString);  
 }
 
 

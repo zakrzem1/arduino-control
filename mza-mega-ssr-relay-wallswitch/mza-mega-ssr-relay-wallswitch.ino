@@ -1,9 +1,9 @@
 #include <RBD_Button.h>
 #include <RBD_Timer.h>
 #include <Firmata.h>
-const int relayPin =  22;    // wardrobe
-const int relayPinB =  23;   // wardrobe
-const int relayPinC =  24;   // wardrobe
+const int relayPin     = 22; // helaA
+const int relayPinB    = 23; // helaB
+const int relayPinC    = 24; // helaC
 const int relayPin8ch1 = 26; // worange
 const int relayPin8ch2 = 27; // orange
 const int relayPin8ch3 = 28; // wgreen
@@ -31,24 +31,17 @@ struct SwitchSensor
 // RBD::Button buttonTopGreen(48);
 // RBD::Button buttonBottomRed(52??);
 RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
+RelayActuator helaABulb = {relayPin, LOW};
+RelayActuator helaBBulb = {relayPinB, LOW};
+RelayActuator helaCBulb = {relayPinC, LOW};
+
 SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, &staircaseUpstairsBulb};
-const int switchSensorPin = 49;
-const int switchSensorPinB = 51;
-const int switchSensorPinC = 53;
-int lastSwitchState = HIGH;
-int lastSwitchStateB = HIGH;
-int lastSwitchStateC = HIGH;
-int switchState = HIGH;
-int switchStateB = HIGH;
-int switchStateC = HIGH;
-int ledState = HIGH;
-int ledStateB = HIGH;
-int ledStateC = HIGH;
-unsigned long lastDebounceTime = 0;
-unsigned long lastDebounceTimeB = 0;
-unsigned long lastDebounceTimeC = 0;
+SwitchSensor helaSwitchSensorA={49, HIGH, HIGH, 0, &helaABulb};
+SwitchSensor helaSwitchSensorB={51, HIGH, HIGH, 0, &helaBBulb};
+SwitchSensor helaSwitchSensorC={53, HIGH, HIGH, 0, &helaCBulb};
+
 const unsigned long debounceDelay = 50;
 RBD::Timer staircaseTimerMiddle;
 RBD::Timer staircaseTimerTop;
@@ -56,16 +49,11 @@ RBD::Timer staircaseTimerBottom;
 char switchLogMsg[56];
 char preparePinLogMsg[29];
 
-void prepare(int relayPinP, int switchSensorPinP, int lastSwitchStateP){
-  pinMode(relayPinP, OUTPUT);
-  pinMode(switchSensorPinP, INPUT_PULLUP);
-  digitalWrite(relayPinP, lastSwitchStateP);
-  snprintf(preparePinLogMsg, sizeof(preparePinLogMsg), "prepare relay pin %i to %i",relayPinP, lastSwitchStateP);
-  Firmata.sendString(preparePinLogMsg);
-}
-
 void prepareRelayActuator(int relayPinP, SwitchSensor switchSensor){
   pinMode(relayPinP, OUTPUT);
+  digitalWrite(relayPinP, switchSensor.lastSwitchState);
+  snprintf(preparePinLogMsg, sizeof(preparePinLogMsg), "prepare relay pin %i to %i",relayPinP, switchSensor.lastSwitchState);
+  Firmata.sendString(preparePinLogMsg);
 }
 
 void prepareWallSwitch(SwitchSensor switchSensor){
@@ -109,18 +97,18 @@ void setup() {
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.begin(57600);
 
-  Firmata.sendString("--- Start Serial Monitor for mza mega ssr relay wallswitch ---");
-  prepare(relayPin, switchSensorPin, lastSwitchState);
-  prepare(relayPinB, switchSensorPinB, lastSwitchStateB);
-  prepare(relayPinC, switchSensorPinC, lastSwitchStateC);  
+  Firmata.sendString("--- Starting mza mega ssr relay wallswitch ---");
 
   prepareWallSwitch(staircaseDownstairsRed);
   prepareWallSwitch(staircaseTopGreen);
+  prepareWallSwitch(helaSwitchSensorA);
+  prepareWallSwitch(helaSwitchSensorB);
+  prepareWallSwitch(helaSwitchSensorC);
   
   prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
   prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
-  
+
   pinMode(LED_BUILTIN, OUTPUT);
   
   staircaseTimerMiddle.setTimeout(500);
@@ -129,9 +117,9 @@ void setup() {
 }
 
 void loop() {
-  process(relayPin, switchSensorPin, &lastSwitchState, &lastDebounceTime, &switchState, &ledState);
-  process(relayPinB, switchSensorPinB, &lastSwitchStateB, &lastDebounceTimeB, &switchStateB, &ledStateB);
-  process(relayPinC, switchSensorPinC, &lastSwitchStateC, &lastDebounceTimeC, &switchStateC, &ledStateC);
+  processSwitchSensor(&helaABulb, &helaSwitchSensorA);
+  processSwitchSensor(&helaBBulb, &helaSwitchSensorB);
+  processSwitchSensor(&helaCBulb, &helaSwitchSensorC);
 
   processSwitchSensor(&staircaseUpstairsBulb, &staircaseDownstairsRed);
   processSwitchSensor(&staircaseUpstairsBulb, &staircaseTopGreen);

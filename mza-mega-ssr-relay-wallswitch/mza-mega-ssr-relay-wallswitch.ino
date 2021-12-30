@@ -35,6 +35,10 @@ RelayActuator helaABulb = {relayPin, LOW};
 RelayActuator helaBBulb = {relayPinB, LOW};
 RelayActuator helaCBulb = {relayPinC, LOW};
 
+RelayActuator gateOpenRelay = {relayPin8ch1, LOW};
+RelayActuator gateCloseRelay = {relayPin8ch2, LOW};
+RelayActuator gateStopRelay = {relayPin8ch3, LOW};
+
 SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, &staircaseUpstairsBulb};
@@ -46,6 +50,9 @@ const unsigned long debounceDelay = 50;
 RBD::Timer staircaseTimerMiddle;
 RBD::Timer staircaseTimerTop;
 RBD::Timer staircaseTimerBottom;
+RBD::Timer gateOpenTimer;
+RBD::Timer gateStopTimer;
+RBD::Timer gateCloseTimer;
 char switchLogMsg[56];
 char preparePinLogMsg[29];
 
@@ -60,8 +67,12 @@ void prepareWallSwitch(SwitchSensor switchSensor){
   pinMode(switchSensor.pin, INPUT_PULLUP);
 }
 
-void processSwitchSensor(RelayActuator *relayActuator, SwitchSensor *switchSensor){
-  int delta = process( relayActuator->pin, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(relayActuator->ledState));
+int processSwitchSensor(RelayActuator *relayActuator, SwitchSensor *switchSensor){
+  return process( relayActuator->pin, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(relayActuator->ledState));
+}
+
+void processSwitchSensorStaircase(RelayActuator *relayActuator, SwitchSensor *switchSensor){
+  int delta = processSwitchSensor(relayActuator, switchSensor);
   if (delta != 0 ){
     staircaseTimerMiddle.restart();
     staircaseTimerBottom.restart();
@@ -91,6 +102,21 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
   return ret;
 }
 
+void processGate(RelayActuator *relay, RBD::Timer *gateTimer){
+  if (relay->ledState == LOW){
+    digitalWrite(relay->pin, relay->ledState);
+    digitalWrite(LED_BUILTIN, relay->ledState);
+    
+    relay->ledState = HIGH;
+    gateTimer->restart();
+  }
+  if(gateTimer->onRestart()){
+    // toggle gate open relay
+    digitalWrite(relay->pin, HIGH);
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
+}
+
 void setup() {
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
   Firmata.attach(STRING_DATA, stringCallback);
@@ -110,10 +136,13 @@ void setup() {
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
 
   pinMode(LED_BUILTIN, OUTPUT);
-  
-  staircaseTimerMiddle.setTimeout(500);
+
   staircaseTimerTop.setTimeout(250);
+  staircaseTimerMiddle.setTimeout(500);
   staircaseTimerBottom.setTimeout(750);
+  gateOpenTimer.setTimeout(500);
+  gateCloseTimer.setTimeout(500);
+  gateStopTimer.setTimeout(500);
 }
 
 void loop() {
@@ -121,8 +150,12 @@ void loop() {
   processSwitchSensor(&helaBBulb, &helaSwitchSensorB);
   processSwitchSensor(&helaCBulb, &helaSwitchSensorC);
 
-  processSwitchSensor(&staircaseUpstairsBulb, &staircaseDownstairsRed);
-  processSwitchSensor(&staircaseUpstairsBulb, &staircaseTopGreen);
+  processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseDownstairsRed);
+  processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseTopGreen);
+
+  processGate(&gateOpenRelay, &gateOpenTimer);
+  processGate(&gateCloseRelay, &gateCloseTimer);
+  processGate(&gateStopRelay, &gateStopTimer);
 
   if(staircaseTimerMiddle.onRestart()){
     // toggle middle light
@@ -150,9 +183,11 @@ void loop() {
 void stringCallback(char *myString)
 {
   if(strcmp(myString, "GO") == 0){
-    digitalWrite(LED_BUILTIN, HIGH);
+    gateOpenRelay.ledState = LOW;
   }else if (strcmp(myString, "GC")==0){
-    digitalWrite(LED_BUILTIN, LOW);
+    gateCloseRelay.ledState = LOW;
+  }else if (strcmp(myString, "GS")==0){
+    gateStopRelay.ledState = LOW;
   }
   Firmata.sendString(myString);  
 }

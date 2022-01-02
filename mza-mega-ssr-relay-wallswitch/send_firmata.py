@@ -10,9 +10,9 @@ logging.basicConfig(level=logging.DEBUG)
 lastReceived='nothing'
 gate_ops = ['GO','GC','GS']
 mqtt_gate_ops = {
-    'open': 'GO',
-    'close': 'GC',
-    'stop': 'GS'
+    'O': 'GO',
+    'C': 'GC',
+    'S': 'GS'
 }
 mqtt_gate_command_topic = 'gate/target/set'
 

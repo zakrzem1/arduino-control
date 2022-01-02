@@ -25,7 +25,7 @@ def handle_string(*received):
 # '/dev/ttyUSB0' on rpi
 # /dev/tty.usbserial-14430 on Mac through dell dongle
 # /dev/tty.usbserial-2230 on Mac through belkin station
-board = Arduino('/dev/tty.usbserial-14430')
+board = Arduino('/dev/ttyUSB0')
 board.add_cmd_handler(STRING_DATA, handle_string)
 
 def send_string(msg):
@@ -38,7 +38,7 @@ def on_incoming_mqtt_gate_cmd(topic, payload):
 it = util.Iterator(board)
 it.start()
 
-moskito_sub.start_client('192.168.1.36', mqtt_gate_command_topic, on_incoming_mqtt_gate_cmd)
+moskito_sub.start_client('127.0.0.1', mqtt_gate_command_topic, on_incoming_mqtt_gate_cmd)
 
 @get('/last')
 def index():

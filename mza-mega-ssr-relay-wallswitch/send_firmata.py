@@ -8,13 +8,14 @@ logging.basicConfig(level=logging.DEBUG)
 #     main()
 
 lastReceived='nothing'
-gate_ops = ('GO','GC','GS')
-mqtt_gate_ops = ('open','close','stop')
+gate_ops = ['GO','GC','GS']
 mqtt_gate_ops = {
     'open': 'GO',
     'close': 'GC',
     'stop': 'GS'
 }
+mqtt_gate_command_topic = 'gate/target/set'
+
 def handle_string(*received):
     global lastReceived
     print('received:')
@@ -31,13 +32,13 @@ def send_string(msg):
     print('sending')
     board.send_sysex(0x71, util.str_to_two_byte_iter(msg+'\0'))
 
-def on_incoming_mqtt_gate_cmd(op):
-    send_string(mqtt_gate_ops[op])
+def on_incoming_mqtt_gate_cmd(topic, payload):
+    send_string(mqtt_gate_ops[payload])
 
 it = util.Iterator(board)
 it.start()
 
-moskito_sub.start_client('192.168.1.36', 'gate', on_incoming_mqtt_gate_cmd)
+moskito_sub.start_client('192.168.1.36', mqtt_gate_command_topic, on_incoming_mqtt_gate_cmd)
 
 @get('/last')
 def index():

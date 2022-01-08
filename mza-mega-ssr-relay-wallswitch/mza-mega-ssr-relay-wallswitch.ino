@@ -31,9 +31,9 @@ struct SwitchSensor
 // RBD::Button buttonTopGreen(48);
 // RBD::Button buttonBottomRed(52??);
 RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
-RelayActuator helaABulb = {relayPin, HIGH};
-RelayActuator helaBBulb = {relayPinB, HIGH};
-RelayActuator helaCBulb = {relayPinC, HIGH};
+RelayActuator helaABulb = {relayPin, LOW};
+RelayActuator helaBBulb = {relayPinB, LOW};
+RelayActuator helaCBulb = {relayPinC, LOW};
 
 RelayActuator gateOpenRelay = {relayPin8ch1, LOW};
 RelayActuator gateCloseRelay = {relayPin8ch2, LOW};

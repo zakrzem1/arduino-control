@@ -131,9 +131,9 @@ void setup() {
   prepareWallSwitch(helaSwitchSensorB);
   prepareWallSwitch(helaSwitchSensorC);
 
-  prepareRelayActuator(helaABulb.pin, helaSwitchSensorA);
-  prepareRelayActuator(helaBBulb.pin, helaSwitchSensorB);
-  prepareRelayActuator(helaCBulb.pin, helaSwitchSensorC);
+  prepareRelayActuator(relayPin, helaSwitchSensorA);
+  prepareRelayActuator(relayPinB, helaSwitchSensorB);
+  prepareRelayActuator(relayPinC, helaSwitchSensorC);
 
   prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
   prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);

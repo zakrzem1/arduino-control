@@ -4,14 +4,19 @@
 const int relayPin     = 22; // helaA
 const int relayPinB    = 23; // helaB
 const int relayPinC    = 24; // helaC
-const int relayPin8ch1 = 26; // worange
-const int relayPin8ch2 = 27; // orange
-const int relayPin8ch3 = 28; // wgreen
+const int relayPin8ch1 = 26; // worange (free)
+const int relayPin8ch2 = 27; // orange  (free)
+const int relayPin8ch3 = 28; // wgreen  (free)
 const int relayPin8ch4 = 29; // blue
 const int relayPin8ch5 = 30; // wblue     staircase upstairs bulb
 const int relayPin8ch6 = 31; // green
 const int relayPin8ch7 = 32; // wh-brown  staircase downstairs bulb
 const int relayPin8ch8 = 33; // brown     staircase middle bulb
+
+const int relayPin4ch1 = 38; // green                       Gate Open 
+const int relayPin4ch2 = 40; // blue                        Gate Stop
+const int relayPin4ch3 = 42; // orange (instead of "red")   Gate Close
+const int relayPin4ch4 = 44; // brown                       Gate "One" - cyclic open, stop, close, stop, ...
 
 struct RelayActuator
 {
@@ -35,9 +40,10 @@ RelayActuator helaABulb = {relayPin, LOW};
 RelayActuator helaBBulb = {relayPinB, LOW};
 RelayActuator helaCBulb = {relayPinC, LOW};
 
-RelayActuator gateOpenRelay = {relayPin8ch1, LOW};
-RelayActuator gateCloseRelay = {relayPin8ch2, LOW};
-RelayActuator gateStopRelay = {relayPin8ch3, LOW};
+RelayActuator gateOpenRelay = {relayPin4ch1, LOW};
+RelayActuator gateStopRelay = {relayPin4ch2, LOW};
+RelayActuator gateCloseRelay = {relayPin4ch3, LOW};
+RelayActuator gateCyclicalRelay = {relayPin4ch4, LOW};
 
 SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};

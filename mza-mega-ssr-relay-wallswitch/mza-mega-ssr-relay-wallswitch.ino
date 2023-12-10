@@ -10,7 +10,7 @@ const int relayPin8ch3 = 28; // wgreen
 const int relayPin8ch4 = 29; // blue
 const int relayPin8ch5 = 30; // wblue     staircase upstairs bulb
 const int relayPin8ch6 = 31; // green
-const int relayPin8ch7 = 32; // wh-brown  staircase downstairs bulb
+const int relayPin8ch7 = 32; // wh-brown  staircase 'downstairs' bulb (billy white bookshelf lighting)
 const int relayPin8ch8 = 33; // brown     staircase middle bulb
 
 struct RelayActuator
@@ -31,9 +31,11 @@ struct SwitchSensor
 // RBD::Button buttonTopGreen(48);
 // RBD::Button buttonBottomRed(52??);
 RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
+RelayActuator billyBookshelfLighting = {relayPin8ch7, LOW};
 SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, &staircaseUpstairsBulb};
+SwitchSensor staircaseDownstairsGreen = {47, HIGH, HIGH, 0, &billyBookshelfLighting};
 const int switchSensorPin = 49;
 const int switchSensorPinB = 51;
 const int switchSensorPinC = 53;
@@ -116,9 +118,10 @@ void setup() {
 
   prepareWallSwitch(staircaseDownstairsRed);
   prepareWallSwitch(staircaseTopGreen);
+  prepareWallSwitch(staircaseDownstairsGreen);
   
   prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
-  prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);
+  prepareRelayActuator(relayPin8ch7, staircaseDownstairsGreen);
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
   
   pinMode(LED_BUILTIN, OUTPUT);
@@ -135,17 +138,19 @@ void loop() {
 
   processSwitchSensor(&staircaseUpstairsBulb, &staircaseDownstairsRed);
   processSwitchSensor(&staircaseUpstairsBulb, &staircaseTopGreen);
+  // FIXME 
+  processSwitchSensor(&billyBookshelfLighting, &staircaseDownstairsRed);
 
   if(staircaseTimerMiddle.onRestart()){
     // toggle middle light
     digitalWrite(relayPin8ch8, staircaseUpstairsBulb.ledState);
   }
-  if(staircaseTimerBottom.onRestart()){
-    // toggle bottom light
-    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
-  }
-//  if(staircaseTimerTop.onRestart()){
+//  if(staircaseTimerBottom.onRestart()){
 //    // toggle bottom light
+//    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
+//  }
+//  if(staircaseTimerTop.onRestart()){
+//    // toggle top light
 //    digitalWrite(relayPin8ch5, staircaseTopRed->ledState);
 //  }
 //  if(buttonTopRed.onPressed()) {

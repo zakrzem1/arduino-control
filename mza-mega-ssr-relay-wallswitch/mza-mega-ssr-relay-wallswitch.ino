@@ -160,11 +160,11 @@ void loop() {
   processSwitchSensor(&helaABulb, &helaSwitchSensorA);
   processSwitchSensor(&helaBBulb, &helaSwitchSensorB);
   processSwitchSensor(&helaCBulb, &helaSwitchSensorC);
+  processSwitchSensor(&billyBookshelfLighting, &staircaseDownstairsGreen);
 
   processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseDownstairsRed);
   processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseTopGreen);
-  // FIXME 
-  processSwitchSensor(&billyBookshelfLighting, &staircaseDownstairsRed);
+
   processGate(&gateOpenRelay, &gateOpenTimer);
   processGate(&gateCloseRelay, &gateCloseTimer);
   processGate(&gateStopRelay, &gateStopTimer);

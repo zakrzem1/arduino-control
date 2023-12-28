@@ -10,7 +10,7 @@ const int relayPin8ch3 = 28; // wgreen  (free)
 const int relayPin8ch4 = 29; // blue
 const int relayPin8ch5 = 30; // wblue     staircase upstairs bulb
 const int relayPin8ch6 = 31; // green
-const int relayPin8ch7 = 32; // wh-brown  staircase downstairs bulb
+const int relayPin8ch7 = 32; // wh-brown  staircase 'downstairs' bulb (billy white bookshelf lighting)
 const int relayPin8ch8 = 33; // brown     staircase middle bulb
 
 const int relayPin4ch1 = 38; // green                       Gate Open 
@@ -44,6 +44,7 @@ RelayActuator gateOpenRelay = {relayPin4ch1, LOW};
 RelayActuator gateStopRelay = {relayPin4ch2, LOW};
 RelayActuator gateCloseRelay = {relayPin4ch3, LOW};
 RelayActuator gateCyclicalRelay = {relayPin4ch4, LOW};
+RelayActuator billyBookshelfLighting = {relayPin8ch7, LOW};
 
 SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
 SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};
@@ -142,7 +143,7 @@ void setup() {
   prepareRelayActuator(relayPinC, helaSwitchSensorC);
 
   prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
-  prepareRelayActuator(relayPin8ch7, staircaseDownstairsRed);
+  prepareRelayActuator(relayPin8ch7, staircaseDownstairsGreen);
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -159,6 +160,7 @@ void loop() {
   processSwitchSensor(&helaABulb, &helaSwitchSensorA);
   processSwitchSensor(&helaBBulb, &helaSwitchSensorB);
   processSwitchSensor(&helaCBulb, &helaSwitchSensorC);
+  processSwitchSensor(&billyBookshelfLighting, &staircaseDownstairsGreen);
 
   processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseDownstairsRed);
   processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseTopGreen);
@@ -171,19 +173,19 @@ void loop() {
     // toggle middle light
     digitalWrite(relayPin8ch8, staircaseUpstairsBulb.ledState);
   }
-  if (staircaseTimerBottom.onRestart()) {
-    // toggle bottom light
-    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
-  }
-  //  if(staircaseTimerTop.onRestart()){
-  //    // toggle bottom light
-  //    digitalWrite(relayPin8ch5, staircaseTopRed->ledState);
-  //  }
-  //  if(buttonTopRed.onPressed()) {
-  //    staircaseTimerMidlle.restart();
-  //    staircaseTimerBottom.restart();
-  //    Serial.println("Button Pressed");
-  //  }
+//  if(staircaseTimerBottom.onRestart()){
+//    // toggle bottom light
+//    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
+//  }
+//  if(staircaseTimerTop.onRestart()){
+//    // toggle top?bottom? light
+//    digitalWrite(relayPin8ch5, staircaseTopRed->ledState);
+//  }
+//  if(buttonTopRed.onPressed()) {
+//    staircaseTimerMidlle.restart();
+//    staircaseTimerBottom.restart();
+//    Serial.println("Button Pressed");
+//  }
   while (Firmata.available()) {
     Firmata.processInput();
   }

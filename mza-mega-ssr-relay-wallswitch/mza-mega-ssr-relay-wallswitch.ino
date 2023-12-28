@@ -1,30 +1,30 @@
 #include <RBD_Button.h>
 #include <RBD_Timer.h>
 #include <Firmata.h>
-const int relayPin     = 22; // helaA
-const int relayPinB    = 23; // helaB
-const int relayPinC    = 24; // helaC
-const int relayPin8ch1 = 26; // worange (free)
-const int relayPin8ch2 = 27; // orange  (free)
-const int relayPin8ch3 = 28; // wgreen  (free)
-const int relayPin8ch4 = 29; // blue
-const int relayPin8ch5 = 30; // wblue     staircase upstairs bulb
-const int relayPin8ch6 = 31; // green
-const int relayPin8ch7 = 32; // wh-brown  staircase 'downstairs' bulb (billy white bookshelf lighting)
-const int relayPin8ch8 = 33; // brown     staircase middle bulb
+// hela room 4channel relay
+const int relayPin = 22;      // helaA ch2 (orange)
+const int relayPinB = 23;     // helaB ch3 (red)
+const int relayPinC = 24;     // helaC ch4 (brown)
+const int relayPin8ch1 = 26;  // worange (free)
+const int relayPin8ch2 = 27;  // orange  (free)
+const int relayPin8ch3 = 28;  // wgreen  (free)
+const int relayPin8ch4 = 29;  // blue
+const int relayPin8ch5 = 30;  // wblue     staircase upstairs bulb
+const int relayPin8ch6 = 31;  // green
+const int relayPin8ch7 = 32;  // wh-brown  staircase 'downstairs' bulb (billy white bookshelf lighting)
+const int relayPin8ch8 = 33;  // brown     staircase middle bulb
+// gate 4channel relay
+const int relayPin4ch1 = 38;  // green                       Gate Open
+const int relayPin4ch2 = 40;  // blue                        Gate Stop
+const int relayPin4ch3 = 42;  // orange (instead of "red")   Gate Close
+const int relayPin4ch4 = 44;  // brown                       Gate "One" - cyclic open, stop, close, stop, ...
 
-const int relayPin4ch1 = 38; // green                       Gate Open 
-const int relayPin4ch2 = 40; // blue                        Gate Stop
-const int relayPin4ch3 = 42; // orange (instead of "red")   Gate Close
-const int relayPin4ch4 = 44; // brown                       Gate "One" - cyclic open, stop, close, stop, ...
-
-struct RelayActuator
-{
+struct RelayActuator {
   int pin;
   int ledState;
 };
-struct SwitchSensor
-{
+
+struct SwitchSensor {
   int pin;
   int lastSwitchState;
   int switchState;
@@ -35,23 +35,25 @@ struct SwitchSensor
 // RBD::Button buttonTopRed(50);
 // RBD::Button buttonTopGreen(48);
 // RBD::Button buttonBottomRed(52??);
-RelayActuator staircaseUpstairsBulb = {relayPin8ch5, LOW};
-RelayActuator helaABulb = {relayPin, LOW};
-RelayActuator helaBBulb = {relayPinB, LOW};
-RelayActuator helaCBulb = {relayPinC, LOW};
+RelayActuator staircaseUpstairsBulb = { relayPin8ch5, LOW };
+RelayActuator helaABulb = { relayPin, LOW };
+RelayActuator helaBBulb = { relayPinB, LOW };
+RelayActuator helaCBulb = { relayPinC, LOW };
 
-RelayActuator gateOpenRelay = {relayPin4ch1, LOW};
-RelayActuator gateStopRelay = {relayPin4ch2, LOW};
-RelayActuator gateCloseRelay = {relayPin4ch3, LOW};
-RelayActuator gateCyclicalRelay = {relayPin4ch4, LOW};
-RelayActuator billyBookshelfLighting = {relayPin8ch7, LOW};
+RelayActuator gateOpenRelay = { relayPin4ch1, LOW };
+RelayActuator gateStopRelay = { relayPin4ch2, LOW };
+RelayActuator gateCloseRelay = { relayPin4ch3, LOW };
+RelayActuator gateCyclicalRelay = { relayPin4ch4, LOW };
+RelayActuator billyBookshelfLighting = { relayPin8ch7, LOW };
 
-SwitchSensor staircaseTopGreen = {48, HIGH, HIGH, 0, &staircaseUpstairsBulb};
-SwitchSensor staircaseTopRed = {50, HIGH, HIGH, 0, &staircaseUpstairsBulb};
-SwitchSensor staircaseDownstairsRed = {52, HIGH, HIGH, 0, &staircaseUpstairsBulb};
-SwitchSensor helaSwitchSensorA = {49, HIGH, HIGH, 0, &helaABulb};
-SwitchSensor helaSwitchSensorB = {51, HIGH, HIGH, 0, &helaBBulb};
-SwitchSensor helaSwitchSensorC = {53, HIGH, HIGH, 0, &helaCBulb};
+SwitchSensor staircaseTopGreen = { 48, HIGH, HIGH, 0, &staircaseUpstairsBulb };
+SwitchSensor staircaseTopRed = { 50, HIGH, HIGH, 0, &staircaseUpstairsBulb };
+SwitchSensor staircaseDownstairsRed = { 52, HIGH, HIGH, 0, &staircaseUpstairsBulb };
+SwitchSensor staircaseDownstairsGreen = { 47, HIGH, HIGH, 0, &billyBookshelfLighting }; // TODO to be confirmed
+
+SwitchSensor helaSwitchSensorA = { 49, HIGH, HIGH, 0, &helaABulb };
+SwitchSensor helaSwitchSensorB = { 51, HIGH, HIGH, 0, &helaBBulb };
+SwitchSensor helaSwitchSensorC = { 53, HIGH, HIGH, 0, &helaCBulb };
 
 const unsigned long debounceDelay = 50;
 RBD::Timer staircaseTimerMiddle;
@@ -75,12 +77,12 @@ void prepareWallSwitch(SwitchSensor switchSensor) {
 }
 
 int processSwitchSensor(RelayActuator *relayActuator, SwitchSensor *switchSensor) {
-  return process( relayActuator->pin, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(relayActuator->ledState));
+  return process(relayActuator->pin, switchSensor->pin, &(switchSensor->lastSwitchState), &(switchSensor->lastDebounceTime), &(switchSensor->switchState), &(relayActuator->ledState));
 }
 
 void processSwitchSensorStaircase(RelayActuator *relayActuator, SwitchSensor *switchSensor) {
   int delta = processSwitchSensor(relayActuator, switchSensor);
-  if (delta != 0 ) {
+  if (delta != 0) {
     staircaseTimerMiddle.restart();
     staircaseTimerBottom.restart();
   }
@@ -98,7 +100,7 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
       *switchStateP = reading;
       if (*switchStateP == LOW) {
         *ledStateP = !*ledStateP;
-        ret =  (*ledStateP) * 2 - 1;
+        ret = (*ledStateP) * 2 - 1;
         snprintf(switchLogMsg, sizeof(switchLogMsg), "triggered switch %i to toggle relay pin %i set to %i", switchSensorPinP, relayPinP, *ledStateP);
         Firmata.sendString(switchLogMsg);
       }
@@ -173,27 +175,26 @@ void loop() {
     // toggle middle light
     digitalWrite(relayPin8ch8, staircaseUpstairsBulb.ledState);
   }
-//  if(staircaseTimerBottom.onRestart()){
-//    // toggle bottom light
-//    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
-//  }
-//  if(staircaseTimerTop.onRestart()){
-//    // toggle top?bottom? light
-//    digitalWrite(relayPin8ch5, staircaseTopRed->ledState);
-//  }
-//  if(buttonTopRed.onPressed()) {
-//    staircaseTimerMidlle.restart();
-//    staircaseTimerBottom.restart();
-//    Serial.println("Button Pressed");
-//  }
+  //  if(staircaseTimerBottom.onRestart()){
+  //    // toggle bottom light
+  //    digitalWrite(relayPin8ch7, staircaseUpstairsBulb.ledState);
+  //  }
+  //  if(staircaseTimerTop.onRestart()){
+  //    // toggle top?bottom? light
+  //    digitalWrite(relayPin8ch5, staircaseTopRed->ledState);
+  //  }
+  //  if(buttonTopRed.onPressed()) {
+  //    staircaseTimerMidlle.restart();
+  //    staircaseTimerBottom.restart();
+  //    Serial.println("Button Pressed");
+  //  }
   while (Firmata.available()) {
     Firmata.processInput();
   }
 }
 
 // firmata callbacks
-void stringCallback(char *myString)
-{
+void stringCallback(char *myString) {
   if (strcmp(myString, "GO") == 0) {
     gateOpenRelay.ledState = LOW;
   } else if (strcmp(myString, "GC") == 0) {
@@ -205,7 +206,6 @@ void stringCallback(char *myString)
 }
 
 
-void sysexCallback(byte command, byte argc, byte *argv)
-{
+void sysexCallback(byte command, byte argc, byte *argv) {
   Firmata.sendSysex(command, argc, argv);
 }

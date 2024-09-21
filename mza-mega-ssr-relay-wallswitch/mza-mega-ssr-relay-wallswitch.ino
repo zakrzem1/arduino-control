@@ -73,6 +73,11 @@ void prepareRelayActuator(int relayPinP, SwitchSensor switchSensor) {
   Firmata.sendString(preparePinLogMsg);
 }
 
+void initRelayActuator(RelayActuator relayActuator) {
+  pinMode(relayActuator.pin, OUTPUT);
+  digitalWrite(relayActuator.pin, relayActuator.ledState);
+}
+
 void prepareWallSwitch(SwitchSensor switchSensor) {
   pinMode(switchSensor.pin, INPUT_PULLUP);
 }
@@ -154,6 +159,12 @@ void setup() {
   staircaseTimerTop.setTimeout(250);
   staircaseTimerMiddle.setTimeout(500);
   staircaseTimerBottom.setTimeout(750);
+
+  // prepare gate relay actuators
+  initRelayActuator(gateOpenRelay);
+  initRelayActuator(gateStopRelay);
+  initRelayActuator(gateCloseRelay);
+  
   gateOpenTimer.setTimeout(500);
   gateCloseTimer.setTimeout(500);
   gateStopTimer.setTimeout(500);

@@ -14,7 +14,7 @@ mqtt_gate_ops = {
     'C': 'GC',
     'S': 'GS'
 }
-mqtt_gate_command_topic = 'gate/target/set'
+mqtt_gate_command_topic = 'gate/target/set' # corresponds to homebridge / mqttthing configuration
 
 def handle_string(*received):
     global lastReceived

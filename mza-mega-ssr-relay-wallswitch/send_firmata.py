@@ -18,7 +18,7 @@ mqtt_gate_command_topic = 'gate/target/set' # corresponds to homebridge / mqttth
 
 def handle_string(*received):
     global lastReceived
-    print('received:')
+    print('arduino responded via serial:')
     lastReceived="".join(map(chr, map(util.from_two_bytes,zip(received[0::2],received[1::2]))))
     print(lastReceived)
 
@@ -30,7 +30,7 @@ board = Arduino('/dev/ttyACM0')
 board.add_cmd_handler(STRING_DATA, handle_string)
 
 def send_string(msg):
-    print('sending')
+    print('sending ' + msg + ' command to arduino via serial')
     board.send_sysex(0x71, util.str_to_two_byte_iter(msg+'\0'))
 
 def on_incoming_mqtt_gate_cmd(topic, payload):

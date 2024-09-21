@@ -19,6 +19,8 @@ const int relayPin4ch2 = 40;  // blue                        Gate Stop
 const int relayPin4ch3 = 42;  // orange (instead of "red")   Gate Close
 const int relayPin4ch4 = 44;  // brown                       Gate "One" - cyclic open, stop, close, stop, ...
 
+const int gateRelaySignalDurationMillis = 1000;
+
 struct RelayActuator {
   int pin;
   int ledState;
@@ -60,9 +62,11 @@ const unsigned long debounceDelay = 50;
 RBD::Timer staircaseTimerMiddle;
 RBD::Timer staircaseTimerTop;
 RBD::Timer staircaseTimerBottom;
-RBD::Timer gateOpenTimer;
-RBD::Timer gateStopTimer;
-RBD::Timer gateCloseTimer;
+
+RBD::Timer gateOpenTimer(gateRelaySignalDurationMillis);
+RBD::Timer gateStopTimer(gateRelaySignalDurationMillis);
+RBD::Timer gateCloseTimer(gateRelaySignalDurationMillis);
+
 char switchLogMsg[56];
 char preparePinLogMsg[29];
 
@@ -118,23 +122,16 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
 }
 
 void processGate(RelayActuator *relay, RBD::Timer *gateTimer) {
-  if (relay->ledState == LOW) {
-    digitalWrite(relay->pin, relay->ledState);
-    digitalWrite(LED_BUILTIN, relay->ledState);
-
-    relay->ledState = HIGH;
-    gateTimer->restart();
+  if (gateTimer->onExpired()) {
+    relay->ledState == HIGH;
   }
-  if (gateTimer->onRestart()) {
-    // toggle gate open relay
-    digitalWrite(relay->pin, HIGH);
-    digitalWrite(LED_BUILTIN, HIGH);
-  }
+  digitalWrite(relay->pin, relay->ledState);
+  digitalWrite(LED_BUILTIN, relay->ledState);
 }
 
 void setup() {
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
-  Firmata.attach(STRING_DATA, stringCallback);
+  Firmata.attach(STRING_DATA, onSerialCommandReceiveStringCallback);
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.begin(57600);
 
@@ -164,10 +161,6 @@ void setup() {
   initRelayActuator(gateOpenRelay);
   initRelayActuator(gateStopRelay);
   initRelayActuator(gateCloseRelay);
-  
-  gateOpenTimer.setTimeout(500);
-  gateCloseTimer.setTimeout(500);
-  gateStopTimer.setTimeout(500);
 }
 
 void loop() {
@@ -206,13 +199,16 @@ void loop() {
 }
 
 // firmata callbacks
-void stringCallback(char *myString) {
+void onSerialCommandReceiveStringCallback(char *myString) {
   if (strcmp(myString, "GO") == 0) {
     gateOpenRelay.ledState = LOW;
+    gateOpenTimer.restart();
   } else if (strcmp(myString, "GC") == 0) {
     gateCloseRelay.ledState = LOW;
+    gateCloseTimer.restart();
   } else if (strcmp(myString, "GS") == 0) {
     gateStopRelay.ledState = LOW;
+    gateStopTimer.restart();
   }
   Firmata.sendString(myString);
 }

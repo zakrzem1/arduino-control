@@ -40,10 +40,11 @@ RelayActuator helaABulb = { relayPin, LOW };
 RelayActuator helaBBulb = { relayPinB, LOW };
 RelayActuator helaCBulb = { relayPinC, LOW };
 
-RelayActuator gateOpenRelay = { relayPin4ch1, LOW };
-RelayActuator gateStopRelay = { relayPin4ch2, LOW };
-RelayActuator gateCloseRelay = { relayPin4ch3, LOW };
-RelayActuator gateCyclicalRelay = { relayPin4ch4, LOW };
+RelayActuator gateOpenRelay = { relayPin4ch1, HIGH };
+RelayActuator gateStopRelay = { relayPin4ch2, HIGH };
+RelayActuator gateCloseRelay = { relayPin4ch3, HIGH };
+// RelayActuator gateCyclicalRelay = { relayPin4ch4, LOW };
+
 RelayActuator billyBookshelfLighting = { relayPin8ch7, LOW };
 
 SwitchSensor staircaseTopGreen = { 48, HIGH, HIGH, 0, &staircaseUpstairsBulb };

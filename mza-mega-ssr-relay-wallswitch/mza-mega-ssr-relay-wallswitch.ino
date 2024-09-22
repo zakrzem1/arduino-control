@@ -13,6 +13,7 @@ const int relayPin8ch5 = 30;  // wblue     staircase upstairs bulb
 const int relayPin8ch6 = 31;  // green
 const int relayPin8ch7 = 32;  // wh-brown  staircase 'downstairs' bulb (billy white bookshelf lighting)
 const int relayPin8ch8 = 33;  // brown     staircase middle bulb
+
 // gate 4channel relay
 const int relayPin4ch1 = 38;  // green                       Gate Open
 const int relayPin4ch2 = 40;  // blue                        Gate Stop
@@ -123,7 +124,9 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
 
 void processGate(RelayActuator *relay, RBD::Timer *gateTimer) {
   if (gateTimer->onExpired()) {
-    relay->ledState == HIGH;
+    snprintf(switchLogMsg, sizeof(switchLogMsg), "timed out gate pin %i, setting HIGH again", relay->pin);
+    Firmata.sendString(switchLogMsg);
+    (*relay).ledState == HIGH;
   }
   digitalWrite(relay->pin, relay->ledState);
   digitalWrite(LED_BUILTIN, relay->ledState);
@@ -152,6 +155,7 @@ void setup() {
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
 
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 
   staircaseTimerTop.setTimeout(250);
   staircaseTimerMiddle.setTimeout(500);
@@ -203,14 +207,16 @@ void onSerialCommandReceiveStringCallback(char *myString) {
   if (strcmp(myString, "GO") == 0) {
     gateOpenRelay.ledState = LOW;
     gateOpenTimer.restart();
+    Firmata.sendString("opening the gate");
   } else if (strcmp(myString, "GC") == 0) {
     gateCloseRelay.ledState = LOW;
     gateCloseTimer.restart();
+    Firmata.sendString("closing the gate");
   } else if (strcmp(myString, "GS") == 0) {
     gateStopRelay.ledState = LOW;
     gateStopTimer.restart();
+    Firmata.sendString("stopping the gate");
   }
-  Firmata.sendString(myString);
 }
 
 

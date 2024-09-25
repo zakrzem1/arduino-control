@@ -124,7 +124,7 @@ int process(int relayPinP, int switchSensorPinP, int *lastSwitchStateP, unsigned
 
 void processGate(RelayActuator *relay, RBD::Timer *gateTimer) {
   if (gateTimer->onExpired()) {
-    (*relay).ledState == HIGH;
+    (*relay).ledState = HIGH;
     snprintf(switchLogMsg, sizeof(switchLogMsg), "timed out gate pin %i, setting to %i again", relay->pin, relay->ledState);
     Firmata.sendString(switchLogMsg);
   }
@@ -155,7 +155,7 @@ void setup() {
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
 
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, HIGH);
 
   staircaseTimerTop.setTimeout(250);
   staircaseTimerMiddle.setTimeout(500);

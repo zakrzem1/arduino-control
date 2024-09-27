@@ -53,7 +53,7 @@ RelayActuator billyBookshelfLighting = { relayPin8ch7, LOW };
 SwitchSensor staircaseTopGreen = { 48, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseTopRed = { 50, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseDownstairsRed = { 52, HIGH, HIGH, 0, &staircaseUpstairsBulb };
-SwitchSensor staircaseDownstairsGreen = { 47, LOW, LOW, 0, &billyBookshelfLighting }; // TODO to be confirmed
+SwitchSensor staircaseDownstairsGreen = { 45, LOW, LOW, 0, &billyBookshelfLighting }; // TODO 47 or 45, to be confirmed
 
 SwitchSensor helaSwitchSensorA = { 49, LOW, LOW, 0, &helaABulb };
 SwitchSensor helaSwitchSensorB = { 51, LOW, LOW, 0, &helaBBulb };

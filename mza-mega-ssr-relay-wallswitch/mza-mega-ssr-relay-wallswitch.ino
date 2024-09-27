@@ -53,11 +53,11 @@ RelayActuator billyBookshelfLighting = { relayPin8ch7, LOW };
 SwitchSensor staircaseTopGreen = { 48, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseTopRed = { 50, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseDownstairsRed = { 52, HIGH, HIGH, 0, &staircaseUpstairsBulb };
-SwitchSensor staircaseDownstairsGreen = { 47, HIGH, HIGH, 0, &billyBookshelfLighting }; // TODO to be confirmed
+SwitchSensor staircaseDownstairsGreen = { 47, LOW, LOW, 0, &billyBookshelfLighting }; // TODO to be confirmed
 
-SwitchSensor helaSwitchSensorA = { 49, HIGH, HIGH, 0, &helaABulb };
-SwitchSensor helaSwitchSensorB = { 51, HIGH, HIGH, 0, &helaBBulb };
-SwitchSensor helaSwitchSensorC = { 53, HIGH, HIGH, 0, &helaCBulb };
+SwitchSensor helaSwitchSensorA = { 49, LOW, LOW, 0, &helaABulb };
+SwitchSensor helaSwitchSensorB = { 51, LOW, LOW, 0, &helaBBulb };
+SwitchSensor helaSwitchSensorC = { 53, LOW, LOW, 0, &helaCBulb };
 
 const unsigned long debounceDelay = 50;
 RBD::Timer staircaseTimerMiddle;

@@ -27,6 +27,7 @@ struct RelayActuator {
   int ledState;
 };
 
+// assuming INPUT pull-up (see prepareWallSwitch()) and pressing button links with GND
 struct SwitchSensor {
   int pin;
   int lastSwitchState;
@@ -53,7 +54,7 @@ RelayActuator billyBookshelfLighting = { relayPin8ch7, LOW };
 SwitchSensor staircaseTopGreen = { 48, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseTopRed = { 50, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseDownstairsRed = { 52, HIGH, HIGH, 0, &staircaseUpstairsBulb };
-SwitchSensor staircaseDownstairsGreen = { 45, LOW, LOW, 0, &billyBookshelfLighting }; // TODO 47 or 45, to be confirmed
+SwitchSensor staircaseDownstairsGreen = { 47, HIGH, HIGH, 0, &billyBookshelfLighting };
 
 SwitchSensor helaSwitchSensorA = { 49, LOW, LOW, 0, &helaABulb };
 SwitchSensor helaSwitchSensorB = { 51, LOW, LOW, 0, &helaBBulb };
@@ -142,6 +143,7 @@ void setup() {
   Firmata.sendString("--- Starting mza mega ssr relay wallswitch ---");
 
   prepareWallSwitch(staircaseDownstairsRed);
+  prepareWallSwitch(staircaseDownstairsGreen);
   prepareWallSwitch(staircaseTopGreen);
   prepareWallSwitch(helaSwitchSensorA);
   prepareWallSwitch(helaSwitchSensorB);

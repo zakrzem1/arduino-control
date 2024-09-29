@@ -9,13 +9,25 @@ logging.basicConfig(level=logging.DEBUG)
 
 lastReceived='nothing'
 gate_ops = ['GO','GC','GS']
-mqtt_gate_ops = {
+lighting_ops = ['BN','BF','SN','SF']
+# BN bookshelf light on
+# BF bookshelf light off
+# SN staircase light on
+# SF staircase light off
+mqtt_ops = {
     'O': 'GO',
     'C': 'GC',
-    'S': 'GS'
+    'S': 'GS',
+    'true' : 'BN',
+    'false' : 'BF',
+    # '' : 'SN',
+    # '' : 'SF'
 }
-mqtt_gate_command_topic = 'gate/target/set' # corresponds to homebridge / mqttthing configuration
 
+# the following corresponds to homebridge / mqttthing configuration
+mqtt_gate_command_topic = 'gate/target/set' 
+mqtt_bookshelf_setstate_topic = 'bookshelf/state'
+subscribe_to_topics = [mqtt_gate_command_topic,mqtt_bookshelf_setstate_topic]
 def handle_string(*received):
     global lastReceived
     print('arduino responded via serial:')
@@ -34,12 +46,13 @@ def send_string(msg):
     board.send_sysex(0x71, util.str_to_two_byte_iter(msg+'\0'))
 
 def on_incoming_mqtt_gate_cmd(topic, payload):
-    send_string(mqtt_gate_ops[payload])
+    send_string(mqtt_ops[payload])
 
 it = util.Iterator(board)
 it.start()
 
-moskito_sub.start_client('127.0.0.1', mqtt_gate_command_topic, on_incoming_mqtt_gate_cmd)
+moskito_sub.start_client('127.0.0.1', subscribe_to_topics, on_incoming_mqtt_gate_cmd)
+# mqtt_bookshelf_setstate_topic
 
 @get('/last')
 def index():

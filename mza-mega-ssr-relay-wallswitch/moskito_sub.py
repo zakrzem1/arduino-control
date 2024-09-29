@@ -1,14 +1,17 @@
 import paho.mqtt.client as mqtt
 import logging
 logger = logging.getLogger(__name__)
-mqtt_topic=''
+mqtt_topics=[]
 qos = 0
 def on_connect(client, userdata, flags, result_code):
-  global mqtt_topic
+  global mqtt_topics
   global qos
   global subscribed
   logger.info("Connected with result code " + str(result_code))
-  subscribed = client.subscribe(mqtt_topic)
+  for(topic in mqtt_topics){
+    # subscribed = 
+    client.subscribe(topic)
+  }
   #info ('subscribed sucess = '+str(mqtt.MQTT_ERR_SUCCESS == subscribed[0])+' msgID: '+str(subscribed[1]))
 
 def on_message(client, userdata, msg):
@@ -24,11 +27,11 @@ def on_publish(mqttc, obj, mid):
   print("published mid: " + str(mid))
   pass
 
-def start_client(mqtt_broker_host, mqtt_topic_to_subscribe, on_command_fn):
-  global mqtt_topic
+def start_client(mqtt_broker_host, mqtt_topics_to_subscribe, on_command_fn):
+  global mqtt_topics
   global on_command
   on_command = on_command_fn
-  mqtt_topic=mqtt_topic_to_subscribe
+  mqtt_topics = mqtt_topics_to_subscribe
   client = mqtt.Client()
   client.enable_logger(logger)
   client.on_connect = on_connect

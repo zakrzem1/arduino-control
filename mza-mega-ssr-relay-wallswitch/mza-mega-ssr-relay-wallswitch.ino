@@ -219,6 +219,18 @@ void onSerialCommandReceiveStringCallback(char *myString) {
     gateStopRelay.ledState = LOW;
     gateStopTimer.restart();
     Firmata.sendString("stopping the gate");
+  } else if (strcmp(myString, "BN") == 0) {
+    billyBookshelfLighting.ledState = HIGH;
+    Firmata.sendString("bookshelf light on");
+  } else if (strcmp(myString, "BF") == 0) {
+    billyBookshelfLighting.ledState = LOW;
+    Firmata.sendString("bookshelf light off");
+  } else if (strcmp(myString, "SN") == 0) {
+    staircaseUpstairsBulb.ledState = HIGH;
+    Firmata.sendString("staircase light on");
+  } else if (strcmp(myString, "SF") == 0) {
+    staircaseUpstairsBulb.ledState = LOW;
+    Firmata.sendString("staircase light off");
   }
 }
 

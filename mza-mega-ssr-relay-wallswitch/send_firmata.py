@@ -46,7 +46,11 @@ def send_string(msg):
     board.send_sysex(0x71, util.str_to_two_byte_iter(msg+'\0'))
 
 def on_incoming_mqtt_gate_cmd(topic, payload):
-    send_string(mqtt_ops[payload])
+    try:
+      send_string(mqtt_ops[payload])
+    except Exception as inst:
+      print(type(inst))
+      print(inst.args)
 
 it = util.Iterator(board)
 it.start()

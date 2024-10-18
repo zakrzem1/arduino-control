@@ -8,10 +8,9 @@ def on_connect(client, userdata, flags, result_code):
   global qos
   global subscribed
   logger.info("Connected with result code " + str(result_code))
-  for(topic in mqtt_topics){
+  for topic in mqtt_topics:
     # subscribed = 
     client.subscribe(topic)
-  }
   #info ('subscribed sucess = '+str(mqtt.MQTT_ERR_SUCCESS == subscribed[0])+' msgID: '+str(subscribed[1]))
 
 def on_message(client, userdata, msg):

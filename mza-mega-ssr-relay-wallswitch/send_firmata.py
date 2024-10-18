@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 # if __name__ == "__main__":
 #     main()
 
-lastReceived='nothing'
+lastReceived=[]
 gate_ops = ['GO','GC','GS']
 lighting_ops = ['BN','BF','SN','SF']
 # BN bookshelf light on
@@ -31,8 +31,8 @@ subscribe_to_topics = [mqtt_gate_command_topic,mqtt_bookshelf_setstate_topic]
 def handle_string(*received):
     global lastReceived
     logger.debug('arduino responded via serial:')
-    lastReceived="".join(map(chr, map(util.from_two_bytes,zip(received[0::2],received[1::2]))))
-    print(lastReceived)
+    lastReceived.append("".join(map(chr, map(util.from_two_bytes,zip(received[0::2],received[1::2])))))
+    logger.info(lastReceived)
 
 # '/dev/ttyUSB0' on rpi
 # /dev/tty.usbserial-14430 on Mac through dell dongle

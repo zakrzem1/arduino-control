@@ -32,6 +32,8 @@ def handle_string(*received):
     global lastReceived
     logger.debug('arduino responded via serial:')
     lastReceived.append("".join(map(chr, map(util.from_two_bytes,zip(received[0::2],received[1::2])))))
+    if(len(lastReceived)>10):
+      lastReceived.pop(0)
     logger.info(lastReceived)
 
 # '/dev/ttyUSB0' on rpi

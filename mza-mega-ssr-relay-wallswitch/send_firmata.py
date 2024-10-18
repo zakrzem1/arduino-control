@@ -18,15 +18,15 @@ mqtt_ops = {
     'O': 'GO',
     'C': 'GC',
     'S': 'GS',
-    'true' : 'BN',
-    'false' : 'BF',
+    '0' : 'BN',
+    '1' : 'BF',
     # '' : 'SN',
     # '' : 'SF'
 }
 
 # the following corresponds to homebridge / mqttthing configuration
-mqtt_gate_command_topic = 'gate/target/set' 
-mqtt_bookshelf_setstate_topic = 'bookshelf/state'
+mqtt_gate_command_topic = 'gate/target/set'
+mqtt_bookshelf_setstate_topic = 'bookshelf/state' # sends '0' or '1' as configured in homebridge
 subscribe_to_topics = [mqtt_gate_command_topic,mqtt_bookshelf_setstate_topic]
 def handle_string(*received):
     global lastReceived
@@ -55,7 +55,7 @@ def on_incoming_mqtt_gate_cmd(topic, payload):
 it = util.Iterator(board)
 it.start()
 
-moskito_sub.start_client('127.0.0.1', subscribe_to_topics, on_incoming_mqtt_gate_cmd)
+mosquitto_client = moskito_sub.start_client('127.0.0.1', subscribe_to_topics, on_incoming_mqtt_gate_cmd)
 # mqtt_bookshelf_setstate_topic
 
 @get('/last')
@@ -81,5 +81,6 @@ except Exception as exc:
     logger.error(inst.args)
     logger.error('exiting due to above exception, bye!')
     board.exit()
+    mosquitto_client.loop_stop()
 
 

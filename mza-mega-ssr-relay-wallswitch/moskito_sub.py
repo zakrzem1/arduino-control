@@ -24,7 +24,6 @@ def on_subscribe(mosq, obj, mid, granted_qos):
 
 def on_publish(mqttc, obj, mid):
   print("published mid: " + str(mid))
-  pass
 
 def start_client(mqtt_broker_host, mqtt_topics_to_subscribe, on_command_fn):
   global mqtt_topics

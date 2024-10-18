@@ -3,7 +3,7 @@ from bottle import get, post, run, template
 import logging
 import moskito_sub  
 logging.basicConfig(level=logging.DEBUG)
-
+logger = logging.getLogger(__name__)
 # if __name__ == "__main__":
 #     main()
 
@@ -30,7 +30,7 @@ mqtt_bookshelf_setstate_topic = 'bookshelf/state'
 subscribe_to_topics = [mqtt_gate_command_topic,mqtt_bookshelf_setstate_topic]
 def handle_string(*received):
     global lastReceived
-    print('arduino responded via serial:')
+    logger.debug('arduino responded via serial:')
     lastReceived="".join(map(chr, map(util.from_two_bytes,zip(received[0::2],received[1::2]))))
     print(lastReceived)
 
@@ -42,15 +42,15 @@ board = Arduino('/dev/ttyACM0')
 board.add_cmd_handler(STRING_DATA, handle_string)
 
 def send_string(msg):
-    print('sending ' + msg + ' command to arduino via serial')
+    logger.debug('sending ' + msg + ' command to arduino via serial')
     board.send_sysex(0x71, util.str_to_two_byte_iter(msg+'\0'))
 
 def on_incoming_mqtt_gate_cmd(topic, payload):
     try:
       send_string(mqtt_ops[payload])
     except Exception as inst:
-      print(type(inst))
-      print(inst.args)
+      logger.error(type(inst))
+      logger.error(inst.args)
 
 it = util.Iterator(board)
 it.start()
@@ -71,13 +71,15 @@ def gate(op):
         send_string(op)
     else:
         print('unknown op: '+op)
-    
     return template('<b>Operation {{op}}</b>!', op=op)    
 
 
 try:
     run(host='localhost', port=8080)
-except:
+except Exception as exc:
+    logger.error(type(inst))
+    logger.error(inst.args)
+    logger.error('exiting due to above exception, bye!')
     board.exit()
-    print('bye!')
+
 

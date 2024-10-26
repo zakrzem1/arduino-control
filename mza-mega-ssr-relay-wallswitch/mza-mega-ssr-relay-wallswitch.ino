@@ -180,8 +180,8 @@ void loop() {
   processSwitchSensorStaircase(&staircaseUpstairsBulb, &staircaseTopGreen);
 
   processGate(&gateOpenRelay, &gateOpenTimer);
-  processGate(&gateCloseRelay, &gateCloseTimer);
   processGate(&gateStopRelay, &gateStopTimer);
+  processGate(&gateCloseRelay, &gateCloseTimer);
 
   if (staircaseTimerMiddle.onRestart()) {
     // toggle middle light

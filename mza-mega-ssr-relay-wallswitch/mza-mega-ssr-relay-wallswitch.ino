@@ -131,7 +131,6 @@ void processGate(RelayActuator *relay, RBD::Timer *gateTimer) {
     Firmata.sendString(switchLogMsg);
   }
   digitalWrite(relay->pin, relay->ledState);
-  digitalWrite(LED_BUILTIN, relay->ledState);
 }
 
 void setup() {
@@ -156,10 +155,6 @@ void setup() {
   prepareRelayActuator(relayPin8ch5, staircaseDownstairsRed);
   prepareRelayActuator(relayPin8ch7, staircaseDownstairsGreen);
   prepareRelayActuator(relayPin8ch8, staircaseDownstairsRed);
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-
   staircaseTimerTop.setTimeout(250);
   staircaseTimerMiddle.setTimeout(500);
   staircaseTimerBottom.setTimeout(750);
@@ -168,6 +163,9 @@ void setup() {
   initRelayActuator(gateOpenRelay);
   initRelayActuator(gateStopRelay);
   initRelayActuator(gateCloseRelay);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, gateCloseRelay.ledState);
+
 }
 
 void loop() {
@@ -182,6 +180,7 @@ void loop() {
   processGate(&gateOpenRelay, &gateOpenTimer);
   processGate(&gateStopRelay, &gateStopTimer);
   processGate(&gateCloseRelay, &gateCloseTimer);
+  digitalWrite(LED_BUILTIN, gateCloseRelay.ledState);
 
   if (staircaseTimerMiddle.onRestart()) {
     // toggle middle light

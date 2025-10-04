@@ -38,7 +38,7 @@ def handle_string(*received):
 # '/dev/ttyUSB0' on rpi
 # /dev/tty.usbserial-14430 on Mac through dell dongle
 # /dev/tty.usbserial-2230 on Mac through belkin station
-# /dev/ttyACM0 is Iduino on pizero 
+# /dev/ttyACM0 is Iduino on pizero (sometimes registers as ACM1 
 board = Arduino('/dev/ttyACM0')
 board.add_cmd_handler(STRING_DATA, handle_string)
 

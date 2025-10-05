@@ -2,6 +2,7 @@ from pyfirmata import Arduino, util, STRING_DATA
 from bottle import get, post, run, template
 import logging
 import moskito_sub  
+import arduino_finding
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 # if __name__ == "__main__":
@@ -39,6 +40,9 @@ def handle_string(*received):
 # /dev/tty.usbserial-14430 on Mac through dell dongle
 # /dev/tty.usbserial-2230 on Mac through belkin station
 # /dev/ttyACM0 is Iduino on pizero (sometimes registers as ACM1 
+device = find_arduino()
+if(!device):
+    raise Exception("No Arduino found.")
 board = Arduino('/dev/ttyACM0')
 board.add_cmd_handler(STRING_DATA, handle_string)
 
@@ -83,5 +87,9 @@ except Exception as exc:
     logger.error('exiting due to above exception, bye!')
     board.exit()
     mosquitto_client.loop_stop()
+
+
+
+
 
 

@@ -20,15 +20,19 @@ mqtt_ops = {
     'C': 'GC',
     'S': 'GS',
     '0' : 'BF',
-    '1' : 'BN'
-    # '' : 'SN',
-    # '' : 'SF'
+    '1' : 'BN',
+    'SN' : 'SN',
+    'SF' : 'SF',
+    'CRMN': 'CRMN',
+    'CRMF': 'CRMF'
 }
 
 # the following corresponds to homebridge / mqttthing configuration
 mqtt_gate_command_topic = 'gate/target/set'
 mqtt_bookshelf_setstate_topic = 'bookshelf/state' # sends '0' or '1' as configured in homebridge
-subscribe_to_topics = [mqtt_gate_command_topic,mqtt_bookshelf_setstate_topic]
+mqtt_staircase_setstate_topic = 'staircase/state'
+mqtt_chimneyroom_setstate_topic = 'chimneyroom/state'
+subscribe_to_topics = [mqtt_gate_command_topic,mqtt_bookshelf_setstate_topic, mqtt_staircase_setstate_topic, mqtt_chimneyroom_setstate_topic]
 def handle_string(*received):
     global lastReceived
     lastReceived.append("".join(map(chr, map(util.from_two_bytes,zip(received[0::2],received[1::2])))))
@@ -43,7 +47,7 @@ def handle_string(*received):
 device = find_arduino()
 if(!device):
     raise Exception("No Arduino found.")
-board = Arduino('/dev/ttyACM0')
+board = Arduino(device)
 board.add_cmd_handler(STRING_DATA, handle_string)
 
 def send_string(msg):

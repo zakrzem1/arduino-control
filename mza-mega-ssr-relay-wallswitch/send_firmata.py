@@ -45,8 +45,8 @@ def handle_string(*received):
 # /dev/tty.usbserial-14430 on Mac through dell dongle
 # /dev/tty.usbserial-2230 on Mac through belkin station
 # /dev/ttyACM0 is Iduino on pizero (sometimes registers as ACM1 
-device = find_arduino()
-if(!device):
+device = arduino_finding.find_arduino()
+if(device is None):
     raise Exception("No Arduino found.")
 board = Arduino(device)
 board.add_cmd_handler(STRING_DATA, handle_string)

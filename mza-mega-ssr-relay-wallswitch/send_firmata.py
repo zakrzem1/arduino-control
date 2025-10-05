@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 lastReceived=[]
 gate_ops = ['GO','GC','GS']
-lighting_ops = ['BN','BF','SN','SF']
+lighting_ops = ['BN','BF','SN','SF','CRMN','CRMF']
+all_ops = gate_ops + lighting_ops
 # BN bookshelf light on
 # BF bookshelf light off
 # SN staircase light on
@@ -73,10 +74,10 @@ def index():
     return template('Last message: <b>{{lastMsg}}</b>!', lastMsg=lastReceived)
 
 
-@post('/gate/<op>')
+@post('/ops/<op>')
 def gate(op):
     print("gate: "+ op)
-    if(op in gate_ops):
+    if(op in all_ops):
         send_string(op)
     else:
         print('unknown op: '+op)

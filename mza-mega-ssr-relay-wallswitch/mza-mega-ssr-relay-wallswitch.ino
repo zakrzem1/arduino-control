@@ -1,10 +1,10 @@
 #include <RBD_Button.h>
 #include <RBD_Timer.h>
 #include <Firmata.h>
-// hela room 4channel relay
-const int relayPin = 22;      // helaA ch2 (orange)
-const int relayPinB = 23;     // helaB ch3 (red)
-const int relayPinC = 24;     // helaC ch4 (brown)
+// chimney room 4channel relay
+const int relayPin = 22;      // chimney room helaA ch2 (orange)
+const int relayPinB = 23;     // chimney room helaB ch3 (red)
+const int relayPinC = 24;     // chimney room helaC ch4 (brown)
 const int relayPin8ch1 = 26;  // worange (free)
 const int relayPin8ch2 = 27;  // orange  (free)
 const int relayPin8ch3 = 28;  // wgreen  (free)
@@ -40,7 +40,8 @@ struct SwitchSensor {
 // RBD::Button buttonTopGreen(48);
 // RBD::Button buttonBottomRed(52??);
 RelayActuator staircaseUpstairsBulb = { relayPin8ch5, LOW };
-RelayActuator helaABulb = { relayPin, LOW };
+// chimney room
+RelayActuator chimneyRoomMainLighting = { relayPin, LOW };
 RelayActuator helaBBulb = { relayPinB, LOW };
 RelayActuator helaCBulb = { relayPinC, LOW };
 
@@ -56,7 +57,8 @@ SwitchSensor staircaseTopRed = { 50, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseDownstairsRed = { 52, HIGH, HIGH, 0, &staircaseUpstairsBulb };
 SwitchSensor staircaseDownstairsGreen = { 47, HIGH, HIGH, 0, &billyBookshelfLighting };
 
-SwitchSensor helaSwitchSensorA = { 49, LOW, LOW, 0, &helaABulb };
+// chimney room
+SwitchSensor chimneyRoomSwitchSensorA = { 49, LOW, LOW, 0, &chimneyRoomMainLighting };
 SwitchSensor helaSwitchSensorB = { 51, LOW, LOW, 0, &helaBBulb };
 SwitchSensor helaSwitchSensorC = { 53, LOW, LOW, 0, &helaCBulb };
 
@@ -144,11 +146,11 @@ void setup() {
   prepareWallSwitch(staircaseDownstairsRed);
   prepareWallSwitch(staircaseDownstairsGreen);
   prepareWallSwitch(staircaseTopGreen);
-  prepareWallSwitch(helaSwitchSensorA);
+  prepareWallSwitch(chimneyRoomSwitchSensorA);
   prepareWallSwitch(helaSwitchSensorB);
   prepareWallSwitch(helaSwitchSensorC);
 
-  prepareRelayActuator(relayPin, helaSwitchSensorA);
+  prepareRelayActuator(relayPin, chimneyRoomSwitchSensorA);
   prepareRelayActuator(relayPinB, helaSwitchSensorB);
   prepareRelayActuator(relayPinC, helaSwitchSensorC);
 
@@ -169,7 +171,7 @@ void setup() {
 }
 
 void loop() {
-  processSwitchSensor(&helaABulb, &helaSwitchSensorA);
+  processSwitchSensor(&chimneyRoomMainLighting, &chimneyRoomSwitchSensorA);
   processSwitchSensor(&helaBBulb, &helaSwitchSensorB);
   processSwitchSensor(&helaCBulb, &helaSwitchSensorC);
   processSwitchSensor(&billyBookshelfLighting, &staircaseDownstairsGreen);
@@ -230,6 +232,12 @@ void onSerialCommandReceiveStringCallback(char *myString) {
   } else if (strcmp(myString, "SF") == 0) {
     staircaseUpstairsBulb.ledState = LOW;
     Firmata.sendString("staircase light off");
+  } else if (strcmp(myString, "CRMN") == 0) {
+    chimneyRoomMainLighting.ledState = HIGH;
+    Firmata.sendString("chimneyRoomMain light on");
+  } else if (strcmp(myString, "CRMF") == 0) {
+    chimneyRoomMainLighting.ledState = LOW;
+    Firmata.sendString("chimneyRoomMain light off");
   }
 }
 

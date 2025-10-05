@@ -58,7 +58,7 @@ SwitchSensor staircaseDownstairsRed = { 52, HIGH, HIGH, 0, &staircaseUpstairsBul
 SwitchSensor staircaseDownstairsGreen = { 47, HIGH, HIGH, 0, &billyBookshelfLighting };
 
 // chimney room
-SwitchSensor chimneyRoomSwitchSensorA = { 49, LOW, LOW, 0, &chimneyRoomMainLighting };
+SwitchSensor chimneyRoomSwitchSensorA = { 49, HIGH, HIGH, 0, &chimneyRoomMainLighting };
 SwitchSensor helaSwitchSensorB = { 51, LOW, LOW, 0, &helaBBulb };
 SwitchSensor helaSwitchSensorC = { 53, LOW, LOW, 0, &helaCBulb };
 
@@ -233,10 +233,10 @@ void onSerialCommandReceiveStringCallback(char *myString) {
     staircaseUpstairsBulb.ledState = LOW;
     Firmata.sendString("staircase light off");
   } else if (strcmp(myString, "CRMN") == 0) {
-    chimneyRoomMainLighting.ledState = HIGH;
+    chimneyRoomMainLighting.ledState = LOW;
     Firmata.sendString("chimneyRoomMain light on");
   } else if (strcmp(myString, "CRMF") == 0) {
-    chimneyRoomMainLighting.ledState = LOW;
+    chimneyRoomMainLighting.ledState = HIGH;
     Firmata.sendString("chimneyRoomMain light off");
   }
 }

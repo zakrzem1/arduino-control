@@ -14,7 +14,7 @@ const int relayPin8ch6 = 31;  // green
 const int relayPin8ch7 = 32;  // wh-brown  staircase 'downstairs' bulb (billy white bookshelf lighting)
 const int relayPin8ch8 = 33;  // brown     staircase middle bulb
 
-// gate 4channel relay
+// low-level-trigger, electromagnetic 4channel relay (gate)
 const int relayPin4ch1 = 38;  // green                       Gate Open
 const int relayPin4ch2 = 40;  // blue                        Gate Stop
 const int relayPin4ch3 = 42;  // orange (instead of "red")   Gate Close
@@ -75,7 +75,7 @@ char preparePinLogMsg[29];
 void prepareRelayActuator(int relayPinP, SwitchSensor switchSensor) {
   pinMode(relayPinP, OUTPUT);
   digitalWrite(relayPinP, switchSensor.lastSwitchState);
-  snprintf(preparePinLogMsg, sizeof(preparePinLogMsg), "prepare relay pin %i to %i", relayPinP, switchSensor.lastSwitchState);
+  snprintf(preparePinLogMsg, sizeof(preparePinLogMsg), "prep output relay pin %i to %i", relayPinP, switchSensor.lastSwitchState);
   Firmata.sendString(preparePinLogMsg);
 }
 

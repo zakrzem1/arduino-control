@@ -1,0 +1,16 @@
+bottle==0.13.4
+certifi==2020.6.20
+chardet==4.0.0
+cryptography==3.3.2
+distro==1.5.0
+idna==2.10
+paho-mqtt==2.1.0
+pyFirmata==1.1.0
+PyGObject==3.38.0
+pyserial==3.5
+python-apt==2.2.1.1
+requests==2.25.1
+six==1.16.0
+ssh-import-id==5.10
+toml==0.10.1
+urllib3==1.26.5
